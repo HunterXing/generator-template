@@ -1,0 +1,36 @@
+import request from '@/utils/request';
+
+const baseUrl = '';
+// const baseUrl = 'https://mock.apifox.com/m1/3138036-0-default'
+
+// 分页列表
+export async function page(params?: any) {
+  return request(`${baseUrl}/{{request_path}}/page`, {
+    method: 'POST',
+    data: params,
+  });
+}
+
+// 新增/编辑
+export async function saveOrUpdate(params?: any) {
+  return request(`${baseUrl}/{{request_path}}/set`, {
+    method: 'POST',
+    data: params,
+  });
+}
+
+// 启用/停用接口
+export async function enableOrDisable(params?: any) {
+  return request(`${baseUrl}/{{request_path}}/enable`, {
+    method: 'POST',
+    data: params,
+  });
+}
+
+// 删除接口
+export async function remove(params?: any) {
+  return request(`${baseUrl}/{{request_path}}/del`, {
+    method: 'POST',
+    data: params,
+  });
+}

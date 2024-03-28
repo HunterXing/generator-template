@@ -1,0 +1,16 @@
+import { atom } from "jotai/index";
+import { defaultSorts } from "@/hooks/useTable";
+
+// 搜索数据
+export const searchParamAtom = atom({
+  pageSize: 10,
+  terms: {
+  },
+  sorts: defaultSorts,
+})
+
+// 新增编辑弹窗是否展示
+export const isVisibleAtom = atom(false)
+
+// 选择列数据
+export const currentItemAtom = atom({})

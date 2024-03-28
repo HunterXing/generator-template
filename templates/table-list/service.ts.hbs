@@ -1,0 +1,38 @@
+import request from '@/utils/request';
+import {DataItem} from "./data";
+
+const baseUrl = '{{ request_path}}'
+
+// 查找
+export async function page(params?: any) {
+  return request(`${baseUrl}/{{  request_path }}/_query`, {
+    method: 'GET',
+    params,
+  });
+}
+
+// 新增修改
+export async function saveOrUpdate(params: Partial<DataItem>) {
+  const METHOD = params.id ? 'PATCH' : 'POST';
+  return request(`${baseUrl}/{{  request_path }}`, {
+    method: METHOD,
+    data: params,
+  });
+}
+
+// 停用/启用
+export async function invalid(params: Partial<DataItem>) {
+  return request(`${baseUrl}/{{  request_path }}/enable`, {
+    method: 'POST',
+    data: params,
+  });
+}
+
+
+// 删除
+export async function remove(id: string) {
+  return request(`${baseUrl}/{{  request_path }}/${id}`, {
+    method: 'DELETE',
+  });
+}
+

@@ -1,0 +1,74 @@
+import React from 'react'
+import { Card, Icon, Popconfirm, Switch, Tooltip, message } from 'antd';
+import styles from './index.less'
+import { useSetAtom } from 'jotai';
+import { currentItemAtom, isVisibleAtom } from './atom/atoms';
+import { enableOrDisable, remove } from './service';
+
+interface Props {
+  item: any;
+  refetch: Functions;
+}
+
+const CardItem = ({ item, refetch }: Props) => {
+  const setCurrentItem = useSetAtom(currentItemAtom)
+  const setVisible = useSetAtom(isVisibleAtom)
+
+  const changeStatus = (id: string, enable: number) => {
+    enableOrDisable({ id: id, enable: Number(!enable) }).then(res => {
+      if (res.message == 'success') {
+        message.success('操作成功');
+        refetch();
+      } else {
+        message.warn(res.message);
+      }
+    })
+  }
+
+  const deleteItem = (id: string) => {
+    remove({ id: id }).then(res => {
+      if (res.message == 'success') {
+        message.success('删除成功');
+        refetch()
+      } else {
+        message.error(res.message);
+      }
+    })
+  }
+
+  return (
+    <Card title={item.name}
+      extra={(<Switch checked={!item.isEnable} onChange={() => changeStatus(item.id, item.isEnable)} />)}
+      actions={[
+        <Tooltip key="update" title='编辑'>
+          <Icon
+            type="edit"
+            onClick={() => {
+              setVisible(true)
+              setCurrentItem(item)
+            }}
+          />
+        </Tooltip>,
+        <Tooltip key="more_actions" title='删除'>
+          <Popconfirm
+            getPopupContainer={() => document.querySelector('body') as HTMLElement}
+            title="确定删除？"
+            onConfirm={() => {
+              deleteItem(item.id)
+            }}
+            okText="确定"
+            cancelText="取消"
+          >
+            <Icon type="delete" />
+          </Popconfirm>
+        </Tooltip>,
+      ]}
+    >
+      <div>
+        卡片内容
+      </div>
+    </Card>
+  )
+}
+
+export default CardItem

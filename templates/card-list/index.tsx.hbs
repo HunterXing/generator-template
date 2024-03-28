@@ -1,0 +1,167 @@
+import React from 'react'
+import SearchForm from '@/components/SearchForm';
+import styles from './index.less';
+import cardStyles from "@/pages/device/product/index.less";
+import { Button, Card, List } from 'antd';
+import Save from './save'
+// @ts-ignore
+import { useList, useEdit } from './hooks';
+import { useTable } from '@/hooks/useTable';
+import { useTableHeight } from "@/hooks/useTableHeight";
+import { useTableContaner } from "@/hooks/useTableContaner";
+import { DataItem } from "./data";
+import CustomEmpty from '@/components/Empty';
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
+import CardItem from './CardItem';
+
+const {{component_name}} = () => {
+  // 新增编辑相关hook
+  const {
+    visible,
+    setVisible,
+    save,
+    currentItem,
+    editModelShow,
+    delMutate,
+    invalidMutate
+  } = useEdit()
+
+  // 列表相关hook
+  const {
+    dataSource,
+    page,
+    searchParam,
+    setSearchParam,
+    refetch,
+    isFetching
+  } = useList({
+    delMutate,
+    invalidMutate,
+    editModelShow
+  })
+
+  const { onTableChange, handleSearch } = useTable(searchParam, setSearchParam, refetch)
+
+  const offsetHeight = 270;
+  const { setTableHeight } = useTableHeight(offsetHeight, dataSource?.length <= 0, '', true)
+  const { changeExpand } = useTableContaner(setTableHeight, offsetHeight)
+
+  return (
+    <PageHeaderWrapper>
+      <Card bordered={false} bodyStyle=\{{padding: '24px 24px 0', marginBottom: 10 }}>
+        <div>
+          <div>
+            {/* @ts-ignore */}
+            <SearchForm
+              search={(params: any) => {
+                handleSearch({
+                  ...params,
+                  size: 12
+                });
+              }}
+              splitItem={3}
+              formItems={[
+                {
+                  label: '卡片名称',
+                  key: 'name',
+                  type: 'string',
+                  props: {
+                    clearable: true,
+                    placeholder: '请输入卡片名称'
+                  },
+                  col: 5
+                },
+              ]}
+              rightBtns={
+                <Button
+                  style=\{{ marginLeft: '10px' }}
+                  icon="plus"
+                  type="primary"
+                  onClick={() => editModelShow()}
+                >
+                  新建
+                </Button>
+              }
+              changeExpand={changeExpand}
+            />
+          </div>
+        </div>
+      </Card>
+      <Card bordered={false} style=\{{ marginTop: '10px' }}>
+        <div style=\{{ marginBottom: '10px', marginTop: '-15px' }}>
+          <div className={cardStyles.filterCardList}>
+            {(dataSource && dataSource?.length > 0) && (
+              <List
+                rowKey="id"
+                loading={isFetching}
+                grid=\{{ gutter: 16, column: 4 }}
+                dataSource={dataSource}
+                renderItem={item => (
+                  <List.Item>
+                    <CardItem
+                      item={item}
+                      refetch={refetch}
+                    ></CardItem>
+                  </List.Item>
+                )}
+
+                pagination=\{{
+                  style: {
+                    marginTop: 24,
+                    marginBottom: 0
+                  },
+                  current: page?.pageIndex + 1,
+                  total: page?.total,
+                  pageSize: page?.pageSize,
+                  showQuickJumper: true,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['12', '24'],
+                  showTotal: (total: number) =>
+                    `共 ${total} 条记录 第  ${page.pageIndex + 1}/${Math.ceil(
+                      page.total / page.pageSize,
+                    )}页`,
+                  onChange: (current: number, size: number) => {
+                    setSearchParam({
+                      ...searchParam,
+                      current,
+                      size
+                    })
+                    refetch()
+                  },
+                  onShowSizeChange: (current: number, size: number) => {
+                    setSearchParam({
+                      ...searchParam,
+                      current,
+                      size
+                    })
+                    refetch()
+                  }
+                }}
+              />
+            )}
+          </div>
+        </div>
+      </Card>
+      {
+        dataSource?.length === 0 && (
+          <CustomEmpty diffHeight={250} style=\{{
+            marginTop: 24
+          }} />
+        )
+      }
+      {
+        visible && (
+          // @ts-ignore
+          <Save
+            data={currentItem}
+            refetch={() => refetch()}
+            close={() => setVisible(false)}
+            save={(values: Partial<DataItem>) => save(values)}
+          />
+        )
+      }
+    </PageHeaderWrapper>
+  )
+}
+
+export default {{component_name}}

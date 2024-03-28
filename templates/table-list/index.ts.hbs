@@ -1,0 +1,156 @@
+import React from 'react'
+import SearchForm from '@/components/SearchForm';
+import styles from '@/utils/table.less';
+import {Button, Card, Table} from 'antd';
+import Save from './save'
+// @ts-ignore
+import { useList, useEdit } from './hooks';
+import { useTable } from '@/hooks/useTable';
+import { useTableHeight } from "@/hooks/useTableHeight";
+import {useTableContaner} from "@/hooks/useTableContaner";
+import {DataItem} from "./data";
+import { PageHeaderWrapper } from '@ant-design/pro-layout';
+import style from './index.less';
+
+
+const {{component_name }}  = () => {
+  // 新增编辑相关hook
+  const {
+    visible,
+    setVisible,
+    save,
+    currentItem,
+    editModelShow,
+    delMutate,
+    invalidMutate
+  } = useEdit()
+
+  // 列表相关hook
+  const {
+    dataSource,
+    page,
+    searchParam,
+    setSearchParam,
+    refetch,
+    isFetching,
+    columns,
+  } = useList({
+    delMutate,
+    invalidMutate,
+    editModelShow
+  })
+
+  const { onTableChange, handleSearch } = useTable(searchParam, setSearchParam, refetch)
+
+  const offsetHeight = 370;
+  const { tableHeight, setTableHeight } =  useTableHeight(offsetHeight, dataSource?.length <= 0, '.Table')
+  const { changeExpand } = useTableContaner(setTableHeight, offsetHeight)
+
+  return (
+    <PageHeaderWrapper>
+      <div>
+        <Card bordered={false} bodyStyle=\{{padding: '16px 24px 0' }}>
+          <div className={styles.tableList}>
+            <div className={'searhFormCardWrap'}>
+              {/* @ts-ignore */}
+              <SearchForm
+                search={(params: any) => {
+                  handleSearch({ terms: {
+                    ...params,
+                  }, pageSize: 10 });
+                }}
+                splitItem={3}
+                formItems={[
+                  {
+                    label: '姓名',
+                    key: 'name$LIKE',
+                    type: 'string',
+                    props: {
+                      clearable: true,
+                      placeholder: '请输入姓名'
+                    },
+                    col: 5
+                  },
+
+                  {
+                    label: '状态',
+                    key: 'state',
+                    type: 'list',
+                    props: {
+                      data: [
+                        {
+                          name: '启用',
+                          id:  'enabled'
+                        },
+                        {
+                          name: '停用',
+                          id:  'disabled',
+                        },
+                      ],
+                      mode: 'single',
+                      clearable: true,
+                    }
+                  }
+                ]}
+                rightBtns={
+                  <Button
+                      style=\{{marginLeft: 8}}
+                      icon="plus"
+                      type="primary"
+                      onClick={() => editModelShow()}
+                  >
+                    新建
+                  </Button>
+                }
+                changeExpand={changeExpand}
+              />
+            </div>
+          </div>
+        </Card>
+        <Card bordered={false} bodyStyle=\{{marginTop: 24 }}>
+          <div className={`${styles.StandardTable} Table`}>
+            <Table
+              loading={isFetching}
+              dataSource={dataSource}
+              columns={columns}
+              rowKey="id"
+              onChange={onTableChange}
+              scroll=\{{
+                x: 'max-content',
+                y: tableHeight
+            }}
+              pagination=\{{
+                style: {
+                  marginTop: 24,
+                  marginBottom: 0
+                },
+                current: page.pageIndex + 1,
+                total: page.total,
+                pageSize: page.pageSize,
+                showQuickJumper: true,
+                showSizeChanger: true,
+                pageSizeOptions: ['10', '20', '50', '100'],
+                showTotal: (total: number) =>
+                  `共 ${total} 条记录 第  ${page.pageIndex + 1}/${Math.ceil(
+                    page.total / page.pageSize,
+                  )}页`,
+              }}
+            />
+          </div>
+        </Card>
+        {
+          visible && (
+            // @ts-ignore
+            <Save
+              data={currentItem}
+              close={() => setVisible(false)}
+              save={(values: Partial<DataItem>) => save(values)}
+            />
+          )
+        }
+      </div>
+    </PageHeaderWrapper>
+  )
+}
+
+export default {{ component_name }}

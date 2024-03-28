@@ -1,0 +1,14 @@
+import { atom } from 'jotai/index';
+
+// 搜索数据
+export const searchParamAtom = atom({
+  size: 12,
+  // sorts: { field: 'createTime', order: 'desc' },
+});
+
+// 新增编辑抽屉是否展示
+export const isVisibleAtom = atom(false);
+
+// 选择列数据
+export const currentItemAtom = atom({});
+

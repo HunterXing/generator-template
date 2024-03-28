@@ -1,0 +1,46 @@
+import { useAtom } from "jotai";
+import { currentItemAtom, isVisibleAtom } from "../atom/atoms";
+import { delAtom, invalidAtom, postAtom, listAtom } from "../atom/atomActions";
+import { DataItem } from "../data";
+import { message } from "antd";
+
+
+export const useEdit = () => {
+  const [visible,  setVisible] = useAtom(isVisibleAtom)
+  const [currentItem, setCurrentItem] = useAtom(currentItemAtom)
+  const [status, mutate] = useAtom(postAtom);
+  const [delStatus, delMutate] = useAtom(delAtom);
+  const [invalidStatus, invalidMutate] = useAtom(invalidAtom);
+  const [listStatus] = useAtom(listAtom);
+  const isLoading = status.isLoading || delStatus.isLoading || invalidStatus.isLoading
+
+  const editModelShow =  (record = {}) => {
+    setVisible(true)
+    setCurrentItem(record)
+  }
+
+  const save = (values: Partial<DataItem>) => {
+    mutate([values]).then(res => {
+      if (res.status === 200) {
+        message.success('操作成功')
+        setVisible(false)
+        listStatus.refetch()
+      } else {
+        message.error(res.message)
+      }
+    })
+  }
+
+
+  return {
+    setVisible,
+    visible,
+    save,
+    setCurrentItem,
+    currentItem,
+    editModelShow,
+    isLoading,
+    invalidMutate,
+    delMutate
+  };
+};

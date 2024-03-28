@@ -1,0 +1,68 @@
+import { Modal, Form, Spin, Input } from 'antd';
+import React from 'react';
+import { FormComponentProps } from 'antd/lib/form';
+import { useAtom } from "jotai";
+import { postAtom } from "../atom/atomActions";
+
+interface Props extends FormComponentProps {
+  close: Function;
+  save: Function;
+  data: any;
+}
+
+const Save: React.FC<Props> = props => {
+  const {
+    form: { getFieldDecorator },
+    form,
+    data,
+  } = props;
+  const [status] = useAtom(postAtom);
+
+  // others
+  const saveData = () => {
+    form.validateFields((err, fileValue) => {
+      if (err) return;
+      props.save({
+        ...fileValue,
+        id: data.id || undefined,
+        state: data.state?.value || 'enabled'
+      });
+    });
+  };
+
+  const formateTitle = () => {
+    let title = '';
+    if (data.id) {
+      title += '编辑';
+    } else {
+      title += '新增';
+    }
+
+    title += '{{component_name}}';
+    return title;
+  };
+
+  return (
+    <Modal maskClosable={false}  title={formateTitle()} visible onOk={() => saveData()} onCancel={() => props.close()}>
+      <Spin spinning={status.isLoading}>
+        <Form labelCol=\{{ span: 4 }} wrapperCol=\{{ span: 20 }}>
+          <Form.Item label="姓名" >
+            {
+              getFieldDecorator('name', {
+                    initialValue: data.name,
+                    rules: [
+                        { required: true, message: '请输入姓名' },
+                        { max: 10, message: '姓名长度不能超过10个字符' },
+                        { pattern: /^[^\s]+$/, message: '姓名不能包含空格' },
+                    ],
+                  }
+              )(
+                  <Input placeholder="请输入姓名" />
+              )}
+          </Form.Item>
+        </Form>
+      </Spin>
+    </Modal>
+  );
+};
+export default Form.create<Props>()(Save);

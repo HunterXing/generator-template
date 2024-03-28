@@ -1,0 +1,27 @@
+import { useAtom } from "jotai";
+import {searchParamAtom} from "../atom/atoms";
+import { listAtom } from "../atom/atomActions";
+import {DataItem} from "../data";
+
+
+export const useList = ({delMutate, invalidMutate, editModelShow}: any) => {
+  const [list] = useAtom(listAtom);
+  const result = list?.data?.result;
+  const [searchParam, setSearchParam] = useAtom(searchParamAtom)
+
+  const edit = (record: Partial<DataItem>) => {
+      editModelShow(record)
+  }
+
+  return {
+      ...list,
+      dataSource: result?.data || [],
+      page: {
+        total: result?.total || 0,
+        pageIndex: result?.pageIndex || 0,
+        pageSize: result?.pageSize || 10,
+      },
+      searchParam,
+      setSearchParam
+    };
+};

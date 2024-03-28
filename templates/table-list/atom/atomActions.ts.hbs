@@ -1,0 +1,44 @@
+import { atomsWithMutation, atomsWithQuery } from "jotai-tanstack-query";
+import { DataItem } from "../data";
+import { invalid, page, remove, saveOrUpdate } from "../service";
+import { RequestPage } from "@/utils/request";
+import { searchParamAtom } from './atoms'
+import encodeQueryParam from "@/utils/encodeParam";
+
+// 查询
+export const [, listAtom] = atomsWithQuery<RequestPage<DataItem>>((get) => ({
+  initialData: undefined,
+  refetchOnWindowFocus: true,
+  refetchOnMount: "always",
+  staleTime: 1000,
+  queryKey: ['{{component_name}}/list'],
+  queryFn: () => {
+    return page(encodeQueryParam(get(searchParamAtom)));
+  },
+}));
+
+// 新增
+export const [, postAtom] = atomsWithMutation((get) => ({
+  mutationKey: ['{{component_name}}/add'],
+  mutationFn: async (params: Partial<DataItem>) => {
+    return await saveOrUpdate(params)
+  },
+}))
+
+// 启用禁用
+export const [, invalidAtom] = atomsWithMutation((get) => ({
+  mutationKey: ['{{component_name}}/enable'],
+  mutationFn: async (params: Partial<DataItem>) => {
+    // @ts-ignore
+    params.state = params.state?.value === 'enabled' ? 'disabled' : 'enabled'
+    return await invalid(params)
+  },
+}))
+
+// 删除
+export const [, delAtom] = atomsWithMutation((get) => ({
+  mutationKey: ['{{component_name}}/del'],
+  mutationFn: async (id: string) => {
+    return await remove(id || '')
+  },
+}))
